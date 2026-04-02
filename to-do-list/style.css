@@ -1,0 +1,329 @@
+
+:root {
+  --bg:         #0f0f0f;
+  --surface:    #181818;
+  --surface2:   #222222;
+  --border:     #2e2e2e;
+  --accent:     #c8f064;
+  --accent-dim: #9dbc3f;
+  --danger:     #ff5c5c;
+  --danger-dim: #cc3a3a;
+  --text:       #f0ede6;
+  --muted:      #888888;
+  --done-bg:    #1a2210;
+  --done-text:  #5c7a30;
+  --radius:     12px;
+  --shadow:     0 8px 32px rgba(0, 0, 0, 0.5);
+  --font-head:  'DM Serif Display', serif;
+  --font-body:  'DM Sans', sans-serif;
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 48px 16px 80px;
+}
+
+
+.app {
+  width: 100%;
+  max-width: 600px;
+}
+
+.header {
+  margin-bottom: 32px;
+}
+
+.header h1 {
+  font-family: var(--font-head);
+  font-size: 2.8rem;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+
+.header h1 span {
+  color: var(--accent);
+}
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.header-meta p {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 300;
+}
+
+
+#contadorTexto {
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+  transition: var(--transition);
+}
+
+
+.form-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.form-row:last-of-type {
+  margin-bottom: 0;
+}
+
+
+input[type="text"],
+input[type="date"] {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color var(--transition);
+  width: 100%;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus {
+  border-color: var(--accent);
+}
+
+/* Ajuste do ícone do calendário para tema escuro */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.4);
+  cursor: pointer;
+}
+
+
+#btnAdicionar {
+  background: var(--accent);
+  color: #0f0f0f;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition), transform var(--transition);
+}
+
+#btnAdicionar:hover {
+  background: var(--accent-dim);
+}
+
+#btnAdicionar:active {
+  transform: scale(0.97);
+}
+
+
+.msg-erro {
+  font-size: 12px;
+  color: var(--danger);
+  margin-top: 8px;
+  min-height: 16px;
+  transition: opacity var(--transition);
+}
+
+
+.lista {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+.tarefa {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estado: tarefa concluída */
+.tarefa.concluida {
+  background: var(--done-bg);
+  border-color: #2a3b18;
+}
+
+
+.tarefa-conteudo {
+  flex: 1;
+  min-width: 0;
+}
+
+.tarefa-nome {
+  font-size: 14px;
+  font-weight: 500;
+  word-break: break-word;
+  transition: color var(--transition), text-decoration var(--transition);
+}
+
+
+.tarefa.concluida .tarefa-nome {
+  text-decoration: line-through;
+  color: var(--done-text);
+}
+
+
+.tarefa-data {
+  display: inline-block;
+  margin-top: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 8px;
+  letter-spacing: 0.3px;
+}
+
+
+.tarefa-acoes {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.btn-concluir,
+.btn-remover {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background var(--transition),
+              color var(--transition),
+              border-color var(--transition),
+              transform var(--transition);
+}
+
+/* Botão Concluir */
+.btn-concluir {
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn-concluir:hover {
+  background: var(--accent);
+  color: #0f0f0f;
+}
+
+/* Botão Concluir quando tarefa já está concluída */
+.tarefa.concluida .btn-concluir {
+  background: var(--done-bg);
+  color: var(--done-text);
+  border-color: #2a3b18;
+}
+
+.tarefa.concluida .btn-concluir:hover {
+  background: var(--surface2);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+/* Botão Remover */
+.btn-remover {
+  background: transparent;
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.btn-remover:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-concluir:active,
+.btn-remover:active {
+  transform: scale(0.95);
+}
+
+
+.estado-vazio {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 0;
+  color: var(--muted);
+}
+
+.estado-vazio.visivel {
+  display: flex;
+}
+
+.icone-vazio {
+  font-size: 2rem;
+  color: var(--border);
+}
+
+.estado-vazio p {
+  font-size: 13px;
+  font-weight: 300;
+}
