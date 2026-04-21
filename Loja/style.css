@@ -1,0 +1,1096 @@
+/* Importa as fontes do Google */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+
+/* Reset: remove margens e paddings padrão do navegador */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+
+/* =====================================================
+   VARIÁVEIS GLOBAIS — paleta de cores e medidas
+   Use var(--nome) para aplicar em qualquer lugar.
+   Para mudar a cor do site inteiro, altere aqui.
+===================================================== */
+:root {
+  /* Fundos — do mais escuro ao mais claro */
+  --bg:          #04080a;   /* fundo principal (quase preto) */
+  --surface:     #080f12;   /* superfície de painéis */
+  --surface-2:   #0c161a;   /* superfície no hover */
+  --surface-3:   #101e24;   /* superfície ainda mais clara */
+
+  /* Bordas */
+  --border:      #0d2d38;   /* borda padrão */
+  --border-2:    #134155;   /* borda com mais destaque */
+
+  /* Ciano neon — cor principal do tema */
+  --glow:        #00ffe1;   /* ciano brilhante */
+  --glow-dim:    #00a896;   /* ciano mais fraco */
+  --glow-muted:  #003d38;   /* ciano muito escuro (fundos) */
+  --glow-faint:  #001f1e;   /* ciano quase imperceptível */
+
+  /* Cores de acento */
+  --green:       #39ff14;   /* verde neon */
+  --green-dim:   #1e8c0a;   /* verde escuro */
+  --red:         #ff3c3c;   /* erros e remover */
+  --amber:       #ffb000;   /* desconto */
+  --purple:      #bf5fff;   /* reservado */
+
+  /* Texto */
+  --text:        #a8d8e8;   /* texto principal */
+  --text-muted:  #2d6070;   /* texto secundário */
+  --text-dim:    #1a4050;   /* texto quase invisível */
+
+  /* Fontes */
+  --mono:        'Share Tech Mono', monospace; /* texto geral */
+  --orb:         'Orbitron', monospace;        /* títulos */
+
+  /* Medidas de layout */
+  --topbar-h:    36px;      /* altura da topbar */
+  --sidenav-w:   220px;     /* largura do sidenav */
+}
+
+html { scroll-behavior: smooth; }
+
+/* Estilo base do body */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden; /* evita scroll horizontal */
+}
+
+/* Grade isométrica no fundo — dois gradientes perpendiculares formam a grade */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0; /* cobre tudo: top/right/bottom/left = 0 */
+  background-image:
+    linear-gradient(rgba(0,255,225,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,225,0.02) 1px, transparent 1px);
+  background-size: 40px 40px; /* tamanho de cada célula da grade */
+  pointer-events: none; /* não bloqueia cliques */
+  z-index: 0;
+}
+
+/* Linha de varredura animada — efeito de monitor antigo */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(transparent, rgba(0,255,225,0.012), transparent);
+  pointer-events: none;
+  animation: scanline 10s linear infinite; /* desce pela tela sem parar */
+  z-index: 9999; /* fica na frente de tudo */
+}
+
+
+/* =====================================================
+   ANIMAÇÕES
+===================================================== */
+
+/* Desce da parte de cima da tela até o final */
+@keyframes scanline  { 0%{transform:translateY(-100%)} 100%{transform:translateY(100vh)} }
+
+/* Pisca entre visível e invisível */
+@keyframes blink     { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* Aparece subindo levemente */
+@keyframes fadeUp    { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+/* Aparece vindo da esquerda */
+@keyframes slideRight{ from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:translateX(0)} }
+
+/* Aumenta e volta — usado no badge do carrinho */
+@keyframes bump      { 0%,100%{transform:scale(1)} 50%{transform:scale(1.4)} }
+
+/* Distorção de sinal: recorta fatias do elemento e desloca lateralmente */
+@keyframes glitch {
+  0%,100% { clip-path:none; transform:none; }
+  20% { clip-path:polygon(0 20%,100% 20%,100% 21%,0 21%); transform:translateX(-2px); }
+  40% { clip-path:polygon(0 60%,100% 60%,100% 62%,0 62%); transform:translateX(2px); }
+  60% { clip-path:none; transform:none; }
+}
+
+/* Janela aparece crescendo de 94% para 100% */
+@keyframes windowOpen {
+  from { opacity:0; transform:scale(0.94) translateY(12px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
+
+/* Ponto piscando com brilho variável — usado no "SCAN ATIVO" */
+@keyframes pulse {
+  0%,100% { opacity:1; box-shadow: 0 0 4px var(--glow); }
+  50%     { opacity:0.5; box-shadow: 0 0 12px var(--glow); }
+}
+
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+
+/* Barra de scroll personalizada */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--glow-muted); }
+
+
+/* =====================================================
+   TOPBAR — barra de sistema fixa no topo
+===================================================== */
+.topbar {
+  position: fixed;        /* não sai da tela ao rolar */
+  top: 0; left: 0; right: 0;
+  height: var(--topbar-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 300;           /* fica na frente do conteúdo */
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+/* Linha brilhante na base da topbar */
+.topbar::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glow-dim), transparent);
+  opacity: 0.5;
+}
+
+.topbar-left { display: flex; align-items: center; gap: 14px; }
+
+/* Logo com fonte Orbitron e brilho */
+.topbar-logo {
+  font-family: var(--orb);
+  font-weight: 900;
+  font-size: 13px;
+  color: var(--glow);
+  letter-spacing: 0.2em;
+  text-shadow: 0 0 14px rgba(0,255,225,0.6);
+}
+
+.logo-sep { color: var(--glow-dim); margin: 0 1px; }
+
+/* Linha vertical separadora */
+.topbar-divider {
+  width: 1px; height: 16px;
+  background: var(--border-2);
+}
+
+.topbar-stat { color: var(--text-muted); font-size: 10px; letter-spacing: 0.1em; }
+.stat-val    { color: var(--text); margin-left: 4px; }
+.stat-ok     { color: var(--green); } /* verde = status OK */
+
+.topbar-center { flex: 1; text-align: center; }
+.topbar-breadcrumb { font-size: 10px; color: var(--text-muted); letter-spacing: 0.08em; }
+
+.topbar-right { display: flex; align-items: center; gap: 14px; }
+
+/* Relógio com fonte Orbitron */
+.topbar-clock {
+  font-family: var(--orb);
+  font-size: 11px;
+  color: var(--glow-dim);
+  letter-spacing: 0.15em;
+}
+
+/* Botão que abre o carrinho */
+.cart-trigger-top {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--glow-muted);
+  color: var(--glow);
+  border: 1px solid var(--glow-dim);
+  padding: 5px 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+.cart-trigger-top:hover {
+  background: rgba(0,255,225,0.08);
+  box-shadow: 0 0 14px rgba(0,255,225,0.25); /* brilho no hover */
+}
+
+/* Badge com a quantidade de itens no carrinho */
+.cart-count-badge {
+  background: var(--glow);
+  color: var(--bg);
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 9px;
+  padding: 1px 5px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 16px;
+}
+/* Animação ao adicionar item: cresce e volta */
+.cart-count-badge.bump { animation: bump 0.35s ease; }
+
+
+/* =====================================================
+   SHELL — divide a tela em sidenav + viewport
+===================================================== */
+.shell {
+  display: flex;                           /* coloca sidenav e viewport lado a lado */
+  margin-top: var(--topbar-h);             /* desce para não ficar atrás da topbar */
+  min-height: calc(100vh - var(--topbar-h)); /* ocupa o restante da altura da tela */
+  position: relative;
+  z-index: 1;
+}
+
+
+/* =====================================================
+   SIDENAV — painel lateral esquerdo
+===================================================== */
+.sidenav {
+  width: var(--sidenav-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column; /* empilha as seções verticalmente */
+  flex-shrink: 0;         /* não encolhe quando a tela for pequena */
+  position: sticky;       /* fica fixo ao rolar o conteúdo */
+  top: var(--topbar-h);   /* começa abaixo da topbar */
+  height: calc(100vh - var(--topbar-h));
+  overflow-y: auto;
+  padding-bottom: 20px;
+}
+
+/* Linha brilhante no lado direito do sidenav */
+.sidenav::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--glow-dim) 40%, var(--glow-dim) 60%, transparent);
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+/* Cada bloco dentro do sidenav */
+.sidenav-section {
+  padding: 18px 14px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Título de cada seção (NAVEGAÇÃO, FILTRAR PREÇO...) */
+.sidenav-label {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  padding-left: 2px;
+}
+
+/* Link de navegação */
+.sidenav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  transition: color 0.18s, background 0.18s;
+  border-left: 2px solid transparent; /* linha lateral invisível */
+  margin-bottom: 2px;
+}
+.sidenav-item:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+/* Item ativo: linha lateral ciano + fundo levemente verde */
+.sidenav-item.active {
+  color: var(--glow);
+  border-left-color: var(--glow);
+  background: var(--glow-faint);
+}
+
+.sidenav-icon { font-size: 10px; width: 14px; text-align: center; }
+
+/* Container dos botões de filtro */
+.sidenav-filter { display: flex; flex-direction: column; gap: 4px; }
+
+/* Botão de filtro */
+.filter-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s;
+}
+/* Hover e estado ativo têm o mesmo visual */
+.filter-btn:hover,
+.filter-btn.active {
+  color: var(--glow);
+  border-color: var(--glow-dim);
+  background: var(--glow-faint);
+}
+
+/* Linha de status no monitor */
+.status-row {
+  display: flex;
+  justify-content: space-between; /* chave à esquerda, valor à direita */
+  align-items: center;
+  padding: 4px 2px;
+  font-size: 10px;
+}
+.status-key  { color: var(--text-dim); letter-spacing: 0.06em; }
+.status-val  { color: var(--text); font-weight: 700; }
+.glow-val    { color: var(--glow); text-shadow: 0 0 8px rgba(0,255,225,0.4); } /* total em ciano brilhante */
+
+/* Linha separadora antes do total */
+.highlight-row { border-top: 1px dashed var(--border); margin-top: 4px; padding-top: 6px; }
+
+/* Bloco de sessão — fixado na base do sidenav */
+.sidenav-bottom {
+  margin-top: auto; /* empurra para o final do sidenav */
+  padding: 14px;
+  border-top: 1px solid var(--border);
+}
+.session-line { font-size: 10px; color: var(--text-dim); margin-bottom: 3px; }
+.session-line span { color: var(--text-muted); }
+
+
+/* =====================================================
+   VIEWPORT — área principal de conteúdo
+===================================================== */
+.viewport {
+  flex: 1;          /* ocupa todo o espaço que sobrar do sidenav */
+  min-width: 0;     /* evita que empurre para fora da tela */
+  padding: 24px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Cabeçalho acima dos produtos */
+.viewport-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+/* Linha brilhante na borda inferior do cabeçalho */
+.viewport-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--glow-dim), transparent);
+  opacity: 0.4;
+}
+
+.vp-eyebrow { font-size: 10px; color: var(--glow-dim); letter-spacing: 0.15em; margin-bottom: 6px; }
+
+/* Título principal com fonte Orbitron */
+.vp-title {
+  font-family: var(--orb);
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.15em;
+  color: var(--text);
+  line-height: 1.1;
+}
+.vp-accent { color: var(--glow); } /* parte do título em ciano */
+
+/* Badge "SCAN ATIVO" com ponto piscando */
+.scan-badge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--glow-faint);
+  border: 1px solid var(--glow-muted);
+  padding: 6px 12px;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--glow-dim);
+}
+.scan-dot {
+  width: 7px; height: 7px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 2s ease infinite; /* pisca com brilho variável */
+}
+
+
+/* =====================================================
+   MODULE GRID — grade assimétrica de produtos
+   
+   Usa CSS Grid de 12 colunas.
+   Cada produto ocupa um número diferente de colunas,
+   criando o layout não-uniforme tipo painel de controle.
+===================================================== */
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr); /* 12 colunas iguais */
+  grid-auto-rows: 160px;                  /* cada linha tem 160px */
+  gap: 3px;                               /* espaço entre os cards */
+}
+
+/* Tamanhos diferentes para cada produto pelo número da posição */
+/* span = quantas colunas o card ocupa */
+.product-module:nth-child(1)  { grid-column: span 5; grid-row: span 2; } /* grande, 2 linhas */
+.product-module:nth-child(2)  { grid-column: span 4; grid-row: span 1; }
+.product-module:nth-child(3)  { grid-column: span 3; grid-row: span 1; }
+.product-module:nth-child(4)  { grid-column: span 4; grid-row: span 1; }
+.product-module:nth-child(5)  { grid-column: span 3; grid-row: span 1; }
+.product-module:nth-child(6)  { grid-column: span 3; grid-row: span 2; }
+.product-module:nth-child(7)  { grid-column: span 5; grid-row: span 2; } /* grande, 2 linhas */
+.product-module:nth-child(8)  { grid-column: span 4; grid-row: span 1; }
+.product-module:nth-child(9)  { grid-column: span 4; grid-row: span 1; }
+.product-module:nth-child(10) { grid-column: span 12; grid-row: span 1; } /* ocupa a linha inteira */
+
+/* Estilo base de cada card de produto */
+.product-module {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  position: relative;  /* necessário para ::before e ::after funcionarem */
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 8px;
+  overflow: hidden;    /* esconde o que sair dos limites (scan line, etc.) */
+  cursor: default;
+  animation: fadeUp 0.4s ease both; /* aparece subindo ao carregar */
+  transition: border-color 0.22s, background 0.22s;
+}
+
+/* Canto superior esquerdo decorativo (só as bordas top+left formam um "L") */
+.product-module::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 18px; height: 18px;
+  border-top: 1.5px solid var(--glow-dim);
+  border-left: 1.5px solid var(--glow-dim);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Canto inferior direito decorativo */
+.product-module::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 18px; height: 18px;
+  border-bottom: 1.5px solid var(--glow-dim);
+  border-right: 1.5px solid var(--glow-dim);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* Hover: borda e fundo ficam um pouco mais claros */
+.product-module:hover {
+  border-color: var(--glow-dim);
+  background: var(--surface-2);
+}
+
+/* Linha de varredura que passa pelo card no hover */
+.product-module:hover .module-scan-line {
+  animation: scanLineHover 0.6s ease forwards;
+}
+@keyframes scanLineHover {
+  from { transform: translateY(-100%); opacity: 0.4; }
+  to   { transform: translateY(200%);  opacity: 0; }
+}
+
+/* A própria linha de varredura (posicionada no topo do card) */
+.module-scan-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glow), transparent);
+  top: 0;
+  pointer-events: none;
+}
+
+/* ID do módulo no canto superior direito */
+.module-id {
+  position: absolute;
+  top: 6px; right: 8px;
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+
+/* Tag de categoria com barra lateral ciano */
+.module-category {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--glow-dim);
+  border-left: 2px solid var(--glow-dim);
+  padding-left: 6px;
+}
+
+/* Emoji/ícone do produto */
+.module-emoji {
+  font-size: 26px;
+  width: 46px; height: 46px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  transition: transform 0.22s;
+  filter: grayscale(0.2); /* levemente dessaturado por padrão */
+}
+/* No hover: cresce levemente e fica colorido */
+.product-module:hover .module-emoji {
+  transform: scale(1.08);
+  filter: grayscale(0);
+}
+
+.module-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  flex: 1; /* ocupa o espaço restante, empurrando o preço para baixo */
+}
+
+.module-price {
+  font-family: var(--orb);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--glow);
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 8px rgba(0,255,225,0.3);
+}
+
+/* Produtos 1 e 7 são maiores (span 2 rows): emoji e texto maiores também */
+.product-module:nth-child(1) .module-emoji,
+.product-module:nth-child(7) .module-emoji { font-size: 34px; width: 58px; height: 58px; }
+.product-module:nth-child(1) .module-price,
+.product-module:nth-child(7) .module-price { font-size: 20px; }
+.product-module:nth-child(1) .module-name,
+.product-module:nth-child(7) .module-name  { font-size: 14px; }
+
+/* Produto 10 (faixa horizontal): muda para layout em linha */
+.product-module:nth-child(10) {
+  flex-direction: row; /* coloca emoji, nome e preço lado a lado */
+  align-items: center;
+  gap: 20px;
+}
+.product-module:nth-child(10) .module-price { margin-left: auto; font-size: 20px; }
+.product-module:nth-child(10) .btn-add-module { margin-left: 0; }
+
+/* Botão "ADD TO CART" em cada card */
+.btn-add-module {
+  margin-top: auto;  /* fica sempre na base do card */
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 7px 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: all 0.2s;
+  white-space: nowrap;
+  position: relative;
+  z-index: 1; /* fica na frente da scan line */
+}
+/* Os colchetes são adicionados via CSS, não HTML */
+.btn-add-module::before { content: '[ '; color: var(--glow-dim); }
+.btn-add-module::after  { content: ' ]'; color: var(--glow-dim); }
+.btn-add-module:hover {
+  color: var(--glow);
+  border-color: var(--glow-dim);
+  background: var(--glow-faint);
+  text-shadow: 0 0 6px rgba(0,255,225,0.4);
+}
+
+/* Efeito glitch no nome do produto ao passar o mouse */
+.product-module:hover .module-name {
+  animation: glitch 0.3s ease;
+}
+
+
+/* =====================================================
+   SYS LOG — linha de terminal no rodapé do viewport
+===================================================== */
+.sys-log {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+.log-prompt { color: var(--glow-dim); }   /* "nexus@shop:~$" */
+.log-text   { color: var(--text-muted); flex: 1; } /* mensagem do sistema */
+.log-cursor { color: var(--glow); animation: blink 1s step-end infinite; } /* █ piscando */
+
+
+/* =====================================================
+   CART BACKDROP — fundo escurecido da janela do carrinho
+===================================================== */
+.cart-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2,6,8,0.75); /* preto com 75% de opacidade */
+  z-index: 400;
+  opacity: 0;           /* invisível por padrão */
+  pointer-events: none; /* não bloqueia cliques quando invisível */
+  transition: opacity 0.3s;
+}
+/* Quando o JS adiciona .open: fica visível e bloqueia cliques */
+.cart-backdrop.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+
+/* =====================================================
+   CART WINDOW — a janela modal do carrinho
+===================================================== */
+.cart-window {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  /* Centraliza a janela na tela */
+  transform: translate(-50%, -50%) scale(0.94);
+  width: min(520px, 95vw); /* 520px no máximo, 95% da tela em mobile */
+  max-height: 90vh;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  z-index: 500; /* na frente do backdrop */
+  display: flex;
+  flex-direction: column;
+  opacity: 0;           /* invisível por padrão */
+  pointer-events: none;
+  /* Animação suave: cubic-bezier cria efeito elástico */
+  transition: opacity 0.3s, transform 0.3s cubic-bezier(0.22,1,0.36,1);
+  box-shadow: 0 0 60px rgba(0,255,225,0.08), 0 30px 80px rgba(0,0,0,0.7);
+}
+/* Quando o JS adiciona .open: aparece com animação */
+.cart-window.open {
+  opacity: 1;
+  pointer-events: all;
+  transform: translate(-50%, -50%) scale(1); /* volta ao tamanho normal */
+}
+
+/* Linha brilhante no topo da janela */
+.cart-window::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glow), transparent);
+  opacity: 0.6;
+}
+
+/* Barra de título da janela */
+.cart-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 14px;
+  user-select: none; /* não deixa selecionar o texto */
+  flex-shrink: 0;
+}
+
+/* Container dos três bolinhas */
+.win-dots { display: flex; gap: 6px; align-items: center; }
+
+/* Cada bolinha */
+.win-dot {
+  width: 12px; height: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--mono);
+  flex-shrink: 0;
+  transition: filter 0.2s;
+}
+.dot-red   { background: #ff3c3c; color: #8b0000; } /* fecha a janela */
+.dot-amber { background: #ffb000; color: #7a5000; cursor: default; } /* decorativo */
+.dot-green { background: var(--green); color: #0a4000; cursor: default; } /* decorativo */
+.win-dot:hover { filter: brightness(1.2); }
+
+/* Título da janela */
+.win-title-text {
+  flex: 1;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--glow-dim);
+  text-transform: uppercase;
+}
+
+.win-pid { font-size: 9px; color: var(--text-dim); letter-spacing: 0.1em; }
+
+/* Menu da janela */
+.cart-menubar {
+  display: flex;
+  align-items: center;
+  background: var(--surface-3);
+  border-bottom: 1px solid var(--border);
+  padding: 0 14px;
+  height: 26px;
+  gap: 0;
+  flex-shrink: 0;
+}
+.cmenu-item {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: 0 10px;
+  height: 100%;
+  display: flex; align-items: center;
+  cursor: default;
+  border-right: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.cmenu-item:hover { background: var(--surface-2); color: var(--text); }
+.cmenu-active     { color: var(--glow); background: var(--glow-faint); }
+.cmenu-spacer     { flex: 1; } /* empurra o botão FLUSH para a direita */
+
+/* Botão de limpar o carrinho */
+.btn-flush {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  border-left: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 0 12px;
+  height: 100%;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.btn-flush:hover { color: var(--red); }
+
+/* Corpo da janela (lista de itens) */
+.cart-body {
+  flex: 1;
+  overflow-y: auto; /* scroll se houver muitos itens */
+  min-height: 100px;
+  max-height: 280px;
+}
+
+.cart-items { display: flex; flex-direction: column; }
+
+/* Cada item na lista do carrinho */
+.cart-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  animation: slideRight 0.22s ease both; /* aparece vindo da esquerda */
+  transition: background 0.15s;
+}
+.cart-item:hover { background: var(--surface-2); }
+
+/* Miniatura (emoji) do produto */
+.cart-item-thumb {
+  font-size: 18px;
+  width: 34px; height: 34px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.cart-item-info  { flex: 1; min-width: 0; } /* min-width evita overflow */
+.cart-item-name  {
+  font-size: 11px; font-weight: 700; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* "..." se for longo */
+}
+.cart-item-price { font-size: 11px; color: var(--glow); margin-top: 2px; }
+
+/* Botões de quantidade (−, número, +) */
+.cart-item-controls { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+
+.qty-btn {
+  width: 22px; height: 22px;
+  background: var(--bg);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: color 0.15s, border-color 0.15s;
+}
+.qty-btn:hover { color: var(--glow); border-color: var(--glow-dim); }
+
+.qty-display {
+  width: 24px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* Botão ✕ que remove o item completamente */
+.btn-remove {
+  width: 22px; height: 22px;
+  background: transparent;
+  color: var(--text-dim);
+  border: none;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  margin-left: 4px;
+  transition: color 0.15s;
+}
+.btn-remove:hover { color: var(--red); }
+
+/* Estado vazio do carrinho */
+.cart-empty {
+  display: none; /* oculto por padrão */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 20px;
+  gap: 10px;
+}
+/* O JS adiciona .visible para mostrar quando o carrinho está vazio */
+.cart-empty.visible { display: flex; }
+
+.empty-glyph { font-family: var(--orb); font-size: 14px; color: var(--text-dim); letter-spacing: 0.2em; }
+.empty-msg   { font-size: 12px; color: var(--text-muted); letter-spacing: 0.08em; }
+.empty-hint  { font-size: 10px; color: var(--text-dim); letter-spacing: 0.06em; }
+
+/* Rodapé da janela do carrinho */
+.cart-footer {
+  border-top: 1px solid var(--border);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--bg);
+  flex-shrink: 0; /* não encolhe para dar espaço à lista */
+}
+
+/* Campo de desconto estilo terminal */
+.discount-cmd {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  font-size: 11px;
+}
+.dcmd-prompt { color: var(--green-dim); }
+.dcmd-text   { color: var(--glow-dim); white-space: nowrap; }
+
+/* Input de desconto: sem bordas laterais, só a borda inferior */
+.dcmd-input {
+  width: 44px;
+  background: transparent;
+  color: var(--glow);
+  border: none;
+  border-bottom: 1px solid var(--glow-dim);
+  font-family: var(--mono);
+  font-size: 11px;
+  outline: none;
+  text-align: center;
+  padding: 0 2px;
+}
+/* Remove as setas do input numérico */
+.dcmd-input::-webkit-inner-spin-button,
+.dcmd-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+.dcmd-pct { color: var(--text-muted); }
+
+/* Botão EXEC */
+.dcmd-exec {
+  background: var(--glow-muted);
+  color: var(--glow);
+  border: 1px solid var(--glow-dim);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  padding: 3px 9px;
+  cursor: pointer;
+  margin-left: auto; /* empurra para a direita */
+  transition: background 0.2s;
+}
+.dcmd-exec:hover { background: rgba(0,255,225,0.1); }
+
+/* Mensagem de resultado do desconto */
+.discount-info {
+  font-size: 10px;
+  color: var(--glow-dim);
+  min-height: 14px; /* reserva espaço mesmo quando vazio */
+  letter-spacing: 0.05em;
+  padding: 0 2px;
+}
+
+/* Bloco de subtotal, desconto e total */
+.totals-block {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  background: var(--surface);
+}
+
+/* Cada linha do bloco de totais */
+.total-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.tl-label      { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); }
+.tl-label.tl-main { color: var(--glow-dim); font-size: 10px; }
+.tl-label.tl-disc { color: var(--amber); } /* desconto em âmbar */
+.tl-val        { font-size: 12px; color: var(--text); }
+.tl-val.tl-disc { color: var(--amber); }
+
+/* Linha do total final com separador pontilhado */
+.total-main-line {
+  border-top: 1px dashed var(--border);
+  margin-top: 4px;
+  padding-top: 6px;
+}
+
+/* O valor total em destaque */
+.tl-main-val {
+  font-family: var(--orb);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--glow);
+  text-shadow: 0 0 10px rgba(0,255,225,0.35);
+}
+
+/* Botão de finalizar compra */
+.btn-checkout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--glow-muted);
+  color: var(--glow);
+  border: 1px solid var(--glow-dim);
+  padding: 14px 16px;
+  font-family: var(--orb);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  width: 100%;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.btn-checkout:hover {
+  background: rgba(0,255,225,0.1);
+  box-shadow: 0 0 20px rgba(0,255,225,0.2);
+}
+/* Fica acinzentado e sem cursor quando desabilitado */
+.btn-checkout:disabled { opacity: 0.2; cursor: not-allowed; box-shadow: none; }
+.btn-checkout:active { transform: scale(0.99); }
+
+.co-icon  { font-size: 12px; }
+.co-arrow { margin-left: auto; } /* empurra a seta para a direita */
+
+
+/* =====================================================
+   TOAST — notificação flutuante temporária
+===================================================== */
+.toast {
+  position: fixed;
+  bottom: 26px; left: 50%;
+  /* Centraliza horizontalmente + começa 12px abaixo */
+  transform: translateX(-50%) translateY(12px);
+  background: var(--surface);
+  color: var(--glow);
+  border: 1px solid var(--glow-dim);
+  padding: 9px 18px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  z-index: 9000;
+  pointer-events: none; /* não interfere com cliques */
+  opacity: 0;           /* invisível por padrão */
+  transition: opacity 0.25s, transform 0.3s;
+  white-space: nowrap;
+  box-shadow: 0 0 20px rgba(0,255,225,0.1);
+}
+/* Adiciona o ">" antes da mensagem via CSS */
+.toast::before { content: '> '; color: var(--glow-dim); }
+
+/* JS adiciona .show para mostrar o toast */
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0); /* sobe para a posição final */
+}
+
+
+/* =====================================================
+   RESPONSIVIDADE — adapta o layout para telas menores
+===================================================== */
+
+/* Tablet: sidenav menor, grade de 6 colunas */
+@media (max-width: 900px) {
+  :root { --sidenav-w: 180px; }
+  .module-grid { grid-template-columns: repeat(6, 1fr); grid-auto-rows: 150px; }
+
+  /* Redistribui os produtos nas 6 colunas */
+  .product-module:nth-child(1)  { grid-column: span 6; grid-row: span 2; }
+  .product-module:nth-child(2)  { grid-column: span 3; }
+  .product-module:nth-child(3)  { grid-column: span 3; }
+  .product-module:nth-child(4)  { grid-column: span 3; }
+  .product-module:nth-child(5)  { grid-column: span 3; }
+  .product-module:nth-child(6)  { grid-column: span 6; }
+  .product-module:nth-child(7)  { grid-column: span 6; grid-row: span 2; }
+  .product-module:nth-child(8)  { grid-column: span 3; }
+  .product-module:nth-child(9)  { grid-column: span 3; }
+  .product-module:nth-child(10) { grid-column: span 6; flex-direction: column; }
+  .product-module:nth-child(10) .module-price { margin-left: 0; font-size: 16px; }
+
+  /* Remove um dos status da topbar */
+  .topbar-stat:nth-child(5) { display: none; }
+}
+
+/* Mobile: sidenav some, grade de 4 colunas, padding menor */
+@media (max-width: 660px) {
+  .sidenav { display: none; } /* esconde o sidenav completamente */
+  :root { --sidenav-w: 0px; }
+  .topbar-stat { display: none; }   /* remove todos os status */
+  .topbar-center { display: none; } /* remove o breadcrumb */
+  .module-grid { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 140px; }
+
+  /* Todos os produtos ocupam 2 colunas, exceto os destaques */
+  .product-module:nth-child(n)  { grid-column: span 2; grid-row: span 1; }
+  .product-module:nth-child(1),
+  .product-module:nth-child(7)  { grid-column: span 4; }
+  .product-module:nth-child(10) { grid-column: span 4; }
+  .viewport { padding: 14px 12px 40px; }
+}
