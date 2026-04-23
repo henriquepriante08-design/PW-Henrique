@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NEXUS://SHOPCART — v4.2.1</title>
+
+  <!-- Arquivo de estilos -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Fontes do Google: Share Tech Mono (texto) e Orbitron (títulos) -->
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- =====================================================
+       TOPBAR — barra fixa no topo, sempre visível
+       Contém: logo | status do sistema | relógio | botão do carrinho
+  ===================================================== -->
+  <div class="topbar">
+
+    <!-- Lado esquerdo: logo e indicadores de status -->
+    <div class="topbar-left">
+      <span class="topbar-logo">NEXUS<span class="logo-sep">//</span>SHOP</span>
+      <span class="topbar-divider"></span><!-- linha vertical decorativa -->
+      <span class="topbar-stat">SYS <span class="stat-val stat-ok">ONLINE</span></span>
+      <span class="topbar-stat">CONN <span class="stat-val stat-ok">SECURE</span></span>
+      <span class="topbar-stat">NODE <span class="stat-val">BRA-01</span></span>
+    </div>
+
+    <!-- Centro: caminho atual estilo terminal (decorativo) -->
+    <div class="topbar-center">
+      <span class="topbar-breadcrumb" id="breadcrumb">&gt; /loja/produtos</span>
+    </div>
+
+    <!-- Lado direito: relógio (atualizado pelo JS) + botão que abre o carrinho -->
+    <div class="topbar-right">
+      <span class="topbar-clock" id="topClock">00:00:00</span>
+      <button class="cart-trigger-top" id="btnOpenCart" aria-label="Abrir carrinho">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 01-8 0"/>
+        </svg>
+        CART.EXE
+        <!-- Número de itens — atualizado pelo JS -->
+        <span class="cart-count-badge" id="cartCountBadge">0</span>
+      </button>
+    </div>
+
+  </div><!-- fim .topbar -->
+
+
+  <!-- =====================================================
+       SHELL — container principal do layout
+       Flexbox: sidenav à esquerda, viewport ocupa o resto
+  ===================================================== -->
+  <div class="shell">
+
+
+    <!-- =================================================
+         SIDENAV — painel lateral com navegação e status
+    ================================================= -->
+    <nav class="sidenav">
+
+      <!-- Links de navegação -->
+      <div class="sidenav-section">
+        <div class="sidenav-label">NAVEGAÇÃO</div>
+        <a href="#" class="sidenav-item active">
+          <span class="sidenav-icon">◈</span><span>Produtos</span>
+        </a>
+        <a href="#" class="sidenav-item">
+          <span class="sidenav-icon">◇</span><span>Ofertas</span>
+        </a>
+        <a href="#" class="sidenav-item">
+          <span class="sidenav-icon">◇</span><span>Histórico</span>
+        </a>
+        <a href="#" class="sidenav-item">
+          <span class="sidenav-icon">◇</span><span>Suporte</span>
+        </a>
+      </div>
+
+      <!-- Botões de filtro por preço
+           data-filter guarda o valor que o JS lê ao clicar -->
+      <div class="sidenav-section">
+        <div class="sidenav-label">FILTRAR PREÇO</div>
+        <div class="sidenav-filter">
+          <button class="filter-btn active" data-filter="todos">TODOS</button>
+          <button class="filter-btn" data-filter="ate50">≤ R$50</button>
+          <button class="filter-btn" data-filter="acima50">&gt; R$50</button>
+        </div>
+        <!-- Select oculto: necessário para o JS original funcionar -->
+        <select id="filterSelect" style="display:none">
+          <option value="todos">Todos</option>
+          <option value="ate50">Até R$50</option>
+          <option value="acima50">Acima de R$50</option>
+        </select>
+      </div>
+
+      <!-- Monitor de status — valores atualizados pelo JS em tempo real -->
+      <div class="sidenav-section sidenav-status">
+        <div class="sidenav-label">MONITOR</div>
+        <div class="status-row">
+          <span class="status-key">CATÁLOGO</span>
+          <span class="status-val" id="productCount">10</span>
+        </div>
+        <div class="status-row">
+          <span class="status-key">NO CARRINHO</span>
+          <span class="status-val" id="cartItemCount">0</span>
+        </div>
+        <div class="status-row">
+          <span class="status-key">DESCONTO</span>
+          <span class="status-val" id="discountStatus">0%</span>
+        </div>
+        <div class="status-row highlight-row">
+          <span class="status-key">TOTAL</span>
+          <span class="status-val glow-val" id="totalValue">R$0,00</span>
+        </div>
+      </div>
+
+      <!-- Informações da sessão — geradas pelo JS ao carregar a página -->
+      <div class="sidenav-bottom">
+        <div class="sidenav-label">SESSÃO</div>
+        <div class="session-line">ID <span id="sessionId">---</span></div>
+        <div class="session-line">UP <span id="uptime">00:00</span></div>
+      </div>
+
+    </nav><!-- fim .sidenav -->
+
+
+    <!-- =================================================
+         VIEWPORT — área principal onde os produtos ficam
+    ================================================= -->
+    <div class="viewport">
+
+      <!-- Cabeçalho da área de produtos -->
+      <div class="viewport-header">
+        <div class="vp-title-block">
+          <div class="vp-eyebrow">// MÓDULOS DISPONÍVEIS</div>
+          <h1 class="vp-title">CATÁLOGO <span class="vp-accent">DE PRODUTOS</span></h1>
+        </div>
+        <div class="vp-header-right">
+          <div class="scan-badge">
+            <span class="scan-dot"></span><!-- ponto verde piscando (CSS) -->
+            SCAN ATIVO
+          </div>
+        </div>
+      </div>
+
+      <!-- Grade de produtos — começa VAZIA, o JS injeta os cards aqui -->
+      <div class="module-grid" id="productGrid"></div>
+
+      <!-- Linha de log: atualizada pelo JS a cada ação do usuário -->
+      <div class="sys-log">
+        <span class="log-prompt">nexus@shop:~$</span>
+        <span class="log-text" id="logText">sistema pronto. catálogo carregado com sucesso.</span>
+        <span class="log-cursor">█</span><!-- cursor piscante via CSS -->
+      </div>
+
+    </div><!-- fim .viewport -->
+
+  </div><!-- fim .shell -->
+
+
+  <!-- =====================================================
+       CART MODAL — janela flutuante do carrinho
+       Invisível por padrão. JS adiciona .open para mostrar.
+  ===================================================== -->
+
+  <!-- Fundo escurecido atrás da janela -->
+  <div class="cart-backdrop" id="cartBackdrop"></div>
+
+  <!-- A janela em si -->
+  <div class="cart-window" id="cartModal" role="dialog">
+
+    <!-- Barra de título estilo OS -->
+    <div class="cart-titlebar">
+      <div class="win-dots">
+        <!-- Vermelho: fecha a janela. Âmbar e verde: decorativos -->
+        <button class="win-dot dot-red" id="btnCloseCart" title="Fechar">✕</button>
+        <span class="win-dot dot-amber">−</span>
+        <span class="win-dot dot-green">□</span>
+      </div>
+      <div class="win-title-text">⬡ CART.EXE — Módulo de Compra Ativo</div>
+      <!-- PID aleatório gerado pelo JS -->
+      <div class="win-pid">PID <span id="cartPid">4096</span></div>
+    </div>
+
+    <!-- Menu da janela — decorativo, exceto o botão FLUSH -->
+    <div class="cart-menubar">
+      <span class="cmenu-item">Arquivo</span>
+      <span class="cmenu-item">Editar</span>
+      <span class="cmenu-item cmenu-active">Carrinho</span>
+      <span class="cmenu-item">Ajuda</span>
+      <span class="cmenu-spacer"></span><!-- empurra o botão para a direita -->
+      <button class="btn-flush" id="btnClearCart">⌫ FLUSH CART</button>
+    </div>
+
+    <!-- Lista de itens do carrinho
+         #cartItems: o JS insere os itens aqui
+         #cartEmpty: aparece quando o carrinho está vazio -->
+    <div class="cart-body">
+      <div class="cart-items" id="cartItems"></div>
+      <div class="cart-empty" id="cartEmpty">
+        <div class="empty-glyph">[ NULL POINTER ]</div>
+        <p class="empty-msg">Nenhum módulo carregado</p>
+        <p class="empty-hint">Selecione produtos no catálogo</p>
+      </div>
+    </div>
+
+    <!-- Rodapé: desconto + totais + botão de compra -->
+    <div class="cart-footer">
+
+      <!-- Campo de desconto estilo terminal -->
+      <div class="discount-cmd">
+        <span class="dcmd-prompt">$</span><!-- decorativo -->
+        <span class="dcmd-text">apply --discount=</span><!-- decorativo -->
+        <input type="number" id="discountInput" class="dcmd-input" placeholder="0" min="0" max="100"/>
+        <span class="dcmd-pct">%</span>
+        <button class="dcmd-exec" id="btnApplyDiscount">EXEC</button>
+      </div>
+
+      <!-- Feedback do desconto — JS escreve aqui -->
+      <div class="discount-info" id="discountInfo"></div>
+
+      <!-- Totais: subtotal | desconto (oculto até ter desconto) | total -->
+      <div class="totals-block">
+        <div class="total-line">
+          <span class="tl-label">SUBTOTAL</span>
+          <span class="tl-val" id="subtotalDisplay">R$ 0,00</span>
+        </div>
+        <!-- Oculto por padrão (display:none), JS mostra quando há desconto -->
+        <div class="total-line discount-line" id="discountLine" style="display:none">
+          <span class="tl-label tl-disc">DESCONTO</span>
+          <span class="tl-val tl-disc" id="discountDisplay">−R$ 0,00</span>
+        </div>
+        <div class="total-line total-main-line">
+          <span class="tl-label tl-main">TOTAL</span>
+          <span class="tl-main-val" id="totalDisplayCart">R$ 0,00</span>
+        </div>
+      </div>
+
+      <!-- Botão de checkout — desabilitado se carrinho vazio (JS controla) -->
+      <button class="btn-checkout" id="btnCheckout">
+        <span class="co-icon">▶</span>
+        EXECUTE CHECKOUT
+        <span class="co-arrow">→</span>
+      </button>
+
+    </div><!-- fim .cart-footer -->
+
+  </div><!-- fim .cart-window -->
+
+
+  <!-- Notificação temporária — JS mostra por 2,5 segundos -->
+  <div class="toast" id="toast"></div>
+
+  <!-- JS carregado por último: garante que o HTML já foi lido -->
+  <script src="script.js"></script>
+</body>
+</html>
