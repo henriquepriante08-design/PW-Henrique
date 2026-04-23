@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>To-Do List</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app">
+
+    <header class="header">
+      <h1>To<span>.</span>Do List</h1>
+      <div class="header-meta">
+        
+        <span id="contadorTexto">0 tarefas</span>
+      </div>
+    </header>
+
+  
+    <div class="form-card">
+      <div class="form-row">
+        <input
+          type="text"
+          id="inputTarefa"
+          placeholder="Descreva sua tarefa..."
+          maxlength="120"
+        />
+      </div>
+      <div class="form-row">
+        <input
+          type="date"
+          id="inputData"
+        />
+        <button id="btnAdicionar" onclick="adicionarTarefa()">
+          Adicionar
+        </button>
+      </div>
+      <!-- Mensagem de erro de validação (oculta por padrão) -->
+      <p id="msgErro" class="msg-erro" aria-live="polite"></p>
+    </div>
+
+   
+    <ul id="listaTarefas" class="lista"></ul>
+
+
+    <div id="estadoVazio" class="estado-vazio">
+      <span class="icone-vazio">✦</span>
+      <p>Nenhuma tarefa adicionada ainda.</p>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
